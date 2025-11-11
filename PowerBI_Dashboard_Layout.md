@@ -132,3 +132,5 @@ Total Revenue = SUM('CRM'[RevenueGenerated])
 
 **Bottom Row:**  
 ➡ Heatmap / Table + Department Filters  
+
+
