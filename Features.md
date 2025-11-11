@@ -21,6 +21,17 @@ Data Source: Employee activity tracker / Time logs
 | ContributionScore | Derived productivity score (system-calculated) | 82         |
 | Department        | Team/Department (Tech, Sales, Marketing)       | Sales      |
 
+| **KPI Name**                      | **Required Features (Columns)**                         | **Source Table** | **Purpose / Usage in Power BI**                       |
+| --------------------------------- | ------------------------------------------------------- | ---------------- | ----------------------------------------------------- |
+| **Active Working Hours**          | `EmployeeID`, `Date`, `ActiveHours`, `Department`       | `Worklog`        | X-Axis → Date / Employee<br>Y-Axis → Sum(ActiveHours) |
+| **Idle Time Ratio**               | `IdleHours`, `TotalHours`, `EmployeeID`, `Date`         | `Worklog`        | Calculate ratio `IdleHours / TotalHours`              |
+| **Daily Work Contribution Score** | `ContributionScore`, `Date`, `EmployeeID`               | `Worklog`        | Plot avg(ContributionScore) by Date or Department     |
+| **Task Completion %**             | `TasksCompleted`, `TasksAssigned`, `EmployeeID`, `Date` | `Worklog`        | DAX = TasksCompleted / TasksAssigned                  |
+| **Task Efficiency**               | `TasksCompleted`, `TasksAssigned`, `Department`         | `Worklog`        | Compare efficiency across employees or teams          |
+
+        Task Completion % = DIVIDE(SUM('Worklog'[TasksCompleted]), SUM('Worklog'[TasksAssigned]), 0) * 100
+        Idle Time Ratio = DIVIDE(SUM('Worklog'[IdleHours]), SUM('Worklog'[TotalHours]), 0)
+
 # 🧩 Used For:
 1. Active Working Hours
 2. Idle Time Ratio
@@ -43,6 +54,15 @@ Data Source: Session logs / Meeting platform API
 | EngagementPoints   | Weighted engagement metric                 | 72         |
 | L&DPoints          | Learning module points (from LMS)          | 85         |
 
+| **KPI Name**                                   | **Required Features (Columns)**                                            | **Source Table** | **Purpose / Usage in Power BI**                       |
+| ---------------------------------------------- | -------------------------------------------------------------------------- | ---------------- | ----------------------------------------------------- |
+| **Daily Session Attendance Rate**              | `SessionsAttended`, `TotalSessions`, `EmployeeID`, `Date`                  | `Attendance`     | DAX = SessionsAttended / TotalSessions                |
+| **Engagement in Live Sessions**                | `EngagementDuration`, `InteractionCount`, `EngagementPoints`, `Department` | `Attendance`     | Analyze engagement over time or across departments    |
+| **Learning & Development Participation Score** | `L&DPoints`, `EmployeeID`, `Department`, `Date`                            | `Attendance`     | Evaluate training participation per intern/department |
+
+    Attendance Rate = DIVIDE(SUM('Attendance'[SessionsAttended]), SUM('Attendance'[TotalSessions]), 0) * 100
+    Engagement Score = AVERAGE('Attendance'[EngagementPoints])
+    L&D Score = AVERAGE('Attendance'[L&DPoints])
 
 # 🧩 Used For:
 1. Daily Session Attendance Rate
@@ -61,6 +81,24 @@ Data Source: Task QA feedback, mentor reviews, system evaluations
 | SubmittedOnTime | Boolean (1=Yes, 0=No)       | 1                    |
 | QualityScore    | Reviewer score (out of 100) | 88                   |
 | ReviewComments  | Qualitative feedback        | “Excellent accuracy” |
+
+| **KPI Name**               | **Required Features (Columns)**                                         | **Source Table**                                | **Purpose / Usage in Power BI**                       |
+| -------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------- |
+| **Timely Submission Rate** | `SubmittedOnTime`, `TaskID`, `EmployeeID`, `EvaluationDate`             | `Evaluation`                                    | DAX = (Count SubmittedOnTime = 1) / Total Evaluations |
+| **Quality Score**          | `QualityScore`, `EvaluationDate`, `Department`, `EmployeeID`            | `Evaluation`                                    | Avg QualityScore by Employee / Team                   |
+| **Performance Index**      | Weighted avg of (`Task Efficiency`, `Attendance Rate`, `Quality Score`) | Combined from Worklog + Attendance + Evaluation | Calculate using DAX weighted model                    |
+
+        Timely Submission Rate = 
+        DIVIDE(
+            COUNTROWS(FILTER('Evaluation', 'Evaluation'[SubmittedOnTime] = 1)),
+            COUNTROWS('Evaluation'),
+            0
+        ) * 100
+        
+        Performance Index = 
+        0.4 * [Task Efficiency] + 
+        0.3 * [Attendance Rate] + 
+        0.3 * [Quality Score]
 
 
 # 🧩 Used For:
@@ -83,6 +121,18 @@ Data Source: CRM system (HubSpot, Zoho, or manual leads tracker)
 | ProductCategory  | Product/service sold                  | Cloud Hosting |
 | ConversionDate   | Date converted to sale                | 2025-11-12    |
 
+| **KPI Name**                           | **Required Features (Columns)**                              | **Source Table** | **Purpose / Usage in Power BI**        |
+| -------------------------------------- | ------------------------------------------------------------ | ---------------- | -------------------------------------- |
+| **Leads Generated by Interns**         | `InternID`, `LeadID`, `LeadDate`, `Department`               | `CRM`            | Count of leads per intern or per month |
+| **Lead-to-Sale Conversion Ratio**      | `LeadStatus` (Open, Won, Lost), `LeadDate`, `ConversionDate` | `CRM`            | DAX = ConvertedLeads / TotalLeads      |
+| **Revenue Impact Score**               | `RevenueGenerated`, `InternID`, `ProductCategory`            | `CRM`            | Compare revenue by intern or category  |
+| **Monthly Revenue Contribution Trend** | `RevenueGenerated`, `LeadDate`, `ConversionDate`             | `CRM`            | Line chart for monthly trends          |
+
+        Total Leads = COUNTROWS('CRM')
+        Converted Leads = COUNTROWS(FILTER('CRM', 'CRM'[LeadStatus] = "Closed Won"))
+        Conversion Rate = DIVIDE([Converted Leads], [Total Leads], 0) * 100
+        Total Revenue = SUM('CRM'[RevenueGenerated])
+
 
 # 🧩 Used For:
 1. Leads Generated
@@ -104,9 +154,29 @@ Data Source: HR/Internship Management System
 | Supervisor   | Reporting manager                    | Asghar         |
 | Status       | Active/Inactive                      | Active         |
 
+| **Feature**  | **Purpose**                                        | **Used Between Tables**                        |
+| ------------ | -------------------------------------------------- | ---------------------------------------------- |
+| `EmployeeID` | Primary Key for joins                              | `Employee ↔ Worklog ↔ Attendance ↔ Evaluation` |
+| `InternID`   | Key for sales interns                              | `Employee ↔ CRM`                               |
+| `Date`       | Time intelligence, trend charts                    | All tables (through Date Table)                |
+| `Department` | Filter for dashboards                              | All tables                                     |
+| `Role`       | Slicer for segmentation (Intern, Analyst, Manager) | `Employee`                                     |
+
+
 # 🧩 Used For:
 1. Relating all tables (Primary Key)
 2. Segmentation filters in Power BI slicers
+
+# 🗂️ Summary Table (For Power BI Model)
+
+| KPI Category | Primary Table       | Key Columns Required                                                           | Example Visual Type               |
+| ------------ | ------------------- | ------------------------------------------------------------------------------ | --------------------------------- |
+| Productivity | `Worklog`           | EmployeeID, Date, ActiveHours, IdleHours, TasksCompleted, TasksAssigned        | Line Chart / Column Chart / Gauge |
+| Attendance   | `Attendance`        | EmployeeID, Date, SessionsAttended, TotalSessions, EngagementPoints, L&DPoints | Line / Donut / Stacked Bar        |
+| Performance  | `Evaluation`        | EmployeeID, QualityScore, SubmittedOnTime, EvaluationDate                      | Bar / Line / Table                |
+| Revenue      | `CRM`               | InternID, LeadID, LeadStatus, RevenueGenerated, ConversionDate                 | Funnel / TreeMap / Line           |
+| Filters      | `Employee` + `Date` | Department, Role, JoinDate                                                     | Global slicers                    |
+
 
 # 🧠 Data Integration Notes
 1. All tables will be connected via EmployeeID or InternID.
