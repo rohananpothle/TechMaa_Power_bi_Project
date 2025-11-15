@@ -200,8 +200,13 @@ Flag where TotalHours > 0
     
     PerformanceIndex =
     0.4 * [TaskCompletionPerc] +
-    0.3 * [ActiveTimePerc] +
     0.3 * [EngagementScore]
+
+    or
+    PerformanceIndex =
+    0.4 * [TaskEfficiency] +
+    0.3 * [Productivity Percentage]
+    
 
 
 ### 16. Output Per Hour
