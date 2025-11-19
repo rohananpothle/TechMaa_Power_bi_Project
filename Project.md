@@ -13,16 +13,6 @@
   11. Department
   12. DataSource
 
-productivity-kpi-dashboard/
-│
-├── README.md
-├── dataset_description.md
-├── calculated_columns.md
-├── kpi_definitions.md
-├── dax_measures.md
-├── powerbi_workflow.md
-├── visuals_guide.md
-└── images/
 
 # Productivity KPI Dashboard (Power BI)
 
@@ -44,19 +34,6 @@ The dashboard provides insights into:
 
 ---
 
-## 📁 Repository Contents
-
-| File | Description |
-|------|-------------|
-| `dataset_description.md` | Columns & data types overview |
-| `calculated_columns.md` | List of all calculated columns derived from dataset |
-| `kpi_definitions.md` | 27+ KPIs with formulas & explanations |
-| `dax_measures.md` | Ready-to-use DAX measures for Power BI |
-| `powerbi_workflow.md` | Step-by-step workflow from data cleaning to dashboard |
-| `visuals_guide.md` | Recommended visuals for each KPI category |
-
----
-
 ## 🚀 Tools Used
 - **Power BI Desktop**
 - **DAX Calculations**
@@ -70,11 +47,6 @@ The dashboard provides insights into:
 - Attendance & Availability Report
 - Contribution & Efficiency Trends
 - Department-Level Insights
-
----
-
-## 🤝 Contribute
-Feel free to raise issues or submit PRs to improve the KPIs or add more visuals.
 
 ---
 
@@ -276,32 +248,6 @@ Below are ready-to-use DAX measures:
               0.3 * [Active Time %] +
               0.3 * [Output per Hour]
   2. Output per Hour: Output per Hour = DIVIDE([Tasks Completed], [Total Active Hours])
-
-
-# Power BI Workflow
-
-## 1. Import Data
-Use Power Query to clean and assign data types.
-
-## 2. Create Calculated Columns
-Define productivity, attendance, and task columns.
-
-## 3. Create Measures
-Use DAX to generate KPI measures.
-
-## 4. Build Visuals
-Generate trend, productivity, and performance dashboards.
-
-## 5. Add Filters, Slicers, Drilldowns
-- Employee
-- Department
-- Date (Year/Month/Week)
-
-## 6. Publish to Power BI Service
-- Create daily/weekly refresh schedule
-
-## 7. Share the dashboard with stakeholders
-
 
 
 # Visuals Guide for Productivity Dashboard
