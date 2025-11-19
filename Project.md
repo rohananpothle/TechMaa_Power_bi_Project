@@ -2,7 +2,7 @@
 
   1. EmployeeID
   2. Date
-  3.LoginTime
+  3. LoginTime
   4. LogoutTime
   5. ActiveHours
   6. IdleHours
